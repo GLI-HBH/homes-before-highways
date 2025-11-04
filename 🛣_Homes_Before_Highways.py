@@ -959,20 +959,6 @@ else:
 
 st.markdown("</div></div>", unsafe_allow_html=True)
 
-# ===== ANALYSIS SECTION =====
-st.markdown("""
-<div class="section-container">
-    <div class="section-header" onclick="toggleSection('analysis')">
-        <span>📈 Analysis & Insights</span>
-        <span id="analysis-icon" class="expand-icon">▼</span>
-    </div>
-    <div id="analysis-content" class="section-content">
-""", unsafe_allow_html=True)
-
-
-st.markdown("</div></div>", unsafe_allow_html=True)
-
-
 # Social Media Icons
 from st_social_media_links import SocialMediaIcons
 social_media_links = [
