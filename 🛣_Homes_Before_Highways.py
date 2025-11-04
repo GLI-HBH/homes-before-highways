@@ -405,24 +405,6 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Load image
-img = Image.open("Highway Displacement.jpg")
-
-# Convert to base64
-buffered = BytesIO()
-img.save(buffered, format="PNG")
-img_str = base64.b64encode(buffered.getvalue()).decode()
-
-# Display centered
-st.markdown(
-    f"""
-    <div style="text-align: center;">
-        <img src="data:image/png;base64,{img_str}" width="1100">
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-
 
 # ===== OVERVIEW SECTION =====
 st.markdown("""
