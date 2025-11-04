@@ -734,24 +734,6 @@ if not df.empty:
     except Exception as ex:
         st.error("Unexpected error rendering map.")
         logger.error(f"Map error: {ex}")
-    
-    # Display statistics
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.metric("Projects Displayed", valid_locations)
-    with col2:
-        if valid_locations > 0:
-            avg_impact = filtered_df['Total_Relocations'].dropna()
-            if len(avg_impact) > 0:
-                st.metric("Average Impact", f"{avg_impact.mean():.1f} displacements")
-            else:
-                st.metric("Average Impact", "—")
-    with col3:
-        total_impact = int(filtered_df['Total_Relocations'].fillna(0).sum())
-        st.metric("Total Impact", f"{total_impact} displacements")
-
-else:
-    st.info("No data available for mapping. Please check that the data file is loaded correctly.")
 
 st.markdown("</div></div>", unsafe_allow_html=True)
 
