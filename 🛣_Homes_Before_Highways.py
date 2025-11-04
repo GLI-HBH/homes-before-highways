@@ -283,10 +283,6 @@ function toggleSection(sectionId) {
 </script>
 """, unsafe_allow_html=True)
 
-# Header with logo
-left_co, cent_co, right_co = st.columns(3)
-with cent_co:
-    st.image("GLI Logo.jpg")
     
 
 # Set up logging
@@ -827,27 +823,6 @@ if not df.empty:
         except:
             display_df = display_df[display_df["CCA_FY"].astype(str) == filter_year]
     
-    # Project summary metrics
-    st.markdown(f"""
-    <div class="metric-grid">
-        <div class="metric-card">
-            <div class="metric-value">{len(display_df)}</div>
-            <div class="metric-label">Filtered Projects</div>
-        </div>
-        <div class="metric-card">
-            <div class="metric-value">{int(display_df['Num_Home_Demolished'].sum())}</div>
-            <div class="metric-label">Homes Demolished</div>
-        </div>
-        <div class="metric-card">
-            <div class="metric-value">{int(display_df['Num_Business_Demolished'].sum())}</div>
-            <div class="metric-label">Businesses Demolished</div>
-        </div>
-        <div class="metric-card">
-            <div class="metric-value">{int(display_df['Total_Relocations'].sum())}</div>
-            <div class="metric-label">Total Relocations</div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
     
     # Enhanced data table
     st.markdown("### 📋 Project Details")
