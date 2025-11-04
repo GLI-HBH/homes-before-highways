@@ -395,59 +395,6 @@ def load_map_data():
 df = load_data()
 map_data = load_map_data()
 
-# Hero section
-st.markdown("""
-<div class="hero-container" style="text-align: center; margin-top: 2em; margin-bottom: 2em;">
-    <h1 class="hero-title" style="font-size: 3em; margin-bottom: 0.5em; color: white;">🏠 Homes Before Highways</h1>
-    <p class="hero-subtitle" style="font-size: 1.5em; line-height: 1.6; max-width: 800px; margin: 0 auto; color: white;">
-        Tracking the true costs of highway expansion and building a future that protects homes, communities, and everyday Californians
-    </p>
-</div>
-""", unsafe_allow_html=True)
-
-
-# ===== OVERVIEW SECTION =====
-st.markdown("""
-<div class="section-container">
-    <div class="section-header" onclick="toggleSection('overview')">
-        <span>🏠 Overview: The Crisis in Numbers</span>
-        <span id="overview-icon" class="expand-icon">▼</span>
-    </div>
-    <div id="overview-content" class="section-content">
-""", unsafe_allow_html=True)
-
-# Calculate key stats
-if not df.empty:
-    total_homes = int(df["Num_Home_Demolished"].sum())
-    total_businesses = int(df["Num_Business_Demolished"].sum())
-    total_relocations = int(df["Total_Relocations"].sum())
-    total_projects = len(df)
-else:
-    total_homes = total_businesses = total_relocations = total_projects = 0
-
-# Enhanced metrics display
-st.markdown(f"""
-<div class="metric-grid">
-    <div class="metric-card">
-        <div class="metric-value">{total_homes}</div>
-        <div class="metric-label">Homes Demolished<br>(2018-2023)</div>
-    </div>
-    <div class="metric-card">
-        <div class="metric-value">{total_businesses}</div>
-        <div class="metric-label">Businesses Destroyed<br>(2018-2023)</div>
-    </div>
-    <div class="metric-card">
-        <div class="metric-value">550+</div>
-        <div class="metric-label">Lane Miles Added<br>(Length of California)</div>
-    </div>
-    <div class="metric-card">
-        <div class="metric-value">200+</div>
-        <div class="metric-label">Planned Highway<br>Expansions</div>
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
-
 
 # ===== INTERACTIVE MAP SECTION =====
 st.markdown("""
