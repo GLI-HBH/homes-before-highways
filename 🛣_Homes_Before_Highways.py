@@ -501,7 +501,7 @@ with layer_cols[1]:
 with layer_cols[2]:
     show_senate = st.checkbox("🏛️ Senate Districts", value=True)
 with layer_cols[3]:
-    show_calenviro = st.checkbox("🌍 Environmental Justice", value=False)
+    show_calenviro = st.checkbox("🌍 CalEnviroScreen", value=False)
 
 # Apply filters and create map
 if not df.empty:
@@ -631,7 +631,7 @@ if not df.empty:
             
             folium.GeoJson(
                 data=geojson_obj,
-                name="Environmental Justice Scores",
+                name="CalEnviroScreen Scores",
                 style_function=ces_style_function,
                 tooltip=folium.GeoJsonTooltip(
                     fields=tooltip_fields,
@@ -1178,79 +1178,6 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-
-# ===== TAKE ACTION SECTION =====
-st.markdown("""
-<div class="section-container">
-    <div class="section-header" onclick="toggleSection('action')">
-        <span>🎯 Take Action</span>
-        <span id="action-icon" class="expand-icon">▼</span>
-    </div>
-    <div id="action-content" class="section-content">
-""", unsafe_allow_html=True)
-
-# Hero call to action
-st.markdown("""
-<div class="cta-container">
-    <h2>🌟 A Better Way Forward</h2>
-    <p>California doesn't have to choose between efficient transportation, affordability, and healthy communities. 
-       We can build a system that delivers all three by investing in strategies that:</p>
-    <ul style="text-align: left; max-width: 600px; margin: 0 auto;">
-        <li>✅ Expand affordable, climate-friendly public transit</li>
-        <li>🏠 Protect communities from displacement and preserve affordable housing</li>
-        <li>🌱 Cut pollution by investing in EV infrastructure</li>
-        <li>💼 Create good local jobs through community-strengthening investments</li>
-    </ul>
-</div>
-""", unsafe_allow_html=True)
-
-# Action items
-col1, col2, col3 = st.columns(3)
-
-with col1:
-    st.markdown("""
-    ### 📝 Sign the Petition
-    
-    Add your voice to demand that California prioritize homes before highways. 
-    Join thousands of Californians calling for transportation justice.
-    """)
-    
-    if st.button("Sign Now", key="petition", use_container_width=True):
-        st.success("Thank you for your interest! In the full application, this would link to the petition.")
-
-with col2:
-    st.markdown("""
-    ### 📢 Share the Map
-    
-    Help spread awareness by sharing this interactive map with your community, 
-    local officials, and social networks.
-    """)
-    
-    if st.button("Share Map", key="share", use_container_width=True):
-        st.success("Sharing functionality would be implemented in the full application.")
-
-with col3:
-    st.markdown("""
-    ### 🤝 Join the Coalition
-    
-    Connect with local organizations and advocates working for transportation 
-    equity in your community.
-    """)
-    
-    if st.button("Get Involved", key="coalition", use_container_width=True):
-        st.success("Coalition information would be provided in the full application.")
-
-# Final takeaways
-st.markdown("""
-### 📚 Key Takeaways
-
-- Highway expansions are not a neutral infrastructure choice — they have measurable,
-  unequal harms on housing stability, small businesses, and public health.
-- The evidence suggests widening highways often produces worse traffic outcomes, higher
-  costs, and substantial community disruption.
-- We can prioritize alternatives: transit, preservation of housing, EV infrastructure,
-  and community-driven investments that create local jobs.
-""")
 
 st.markdown("</div></div>", unsafe_allow_html=True)
 
