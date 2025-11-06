@@ -1,3 +1,6 @@
+
+
+
 # Standard libraries
 import os
 import time
@@ -36,7 +39,7 @@ import requests
 # Streamlit core and components
 import streamlit as st
 
-# Set page configuration
+# Set page configuration - MAKE WIDE BY DEFAULT
 st.set_page_config(
     page_title="Homes Before Highways", 
     layout="wide", 
@@ -47,104 +50,65 @@ st.set_page_config(
 # Enhanced CSS for scrolling design
 st.markdown("""
 <style>
-    /* Global Styles */
+    /* Global Styles - Full screen */
     .stApp {
         background: #F9FAF9;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         color: #1C1C1C;
     }
     
-    /* Main content area */
+    /* Main content area - maximize space */
     .main .block-container {
         padding-top: 1rem;
-        padding-bottom: 2rem;
-        max-width: 1200px;
-        margin: 0 auto;
+        padding-bottom: 1rem;
+        max-width: 100%;
+        padding-left: 2rem;
+        padding-right: 2rem;
     }
     
     /* Hero section */
     .hero-container {
         background: linear-gradient(135deg, #007A33 0%, #005924 100%);
         color: white;
-        padding: 4rem 2rem;
+        padding: 2rem 2rem;
         border-radius: 20px;
-        margin-bottom: 3rem;
+        margin-bottom: 2rem;
         text-align: center;
         position: relative;
         overflow: hidden;
     }
     
     .hero-title {
-        font-size: 3.5rem;
+        font-size: 2.5rem;
         font-weight: 800;
-        margin-bottom: 1rem;
+        margin-bottom: 0.5rem;
         text-shadow: 0 2px 4px rgba(0,0,0,0.3);
     }
     
     .hero-subtitle {
-        font-size: 1.3rem;
+        font-size: 1.1rem;
         font-weight: 300;
-        margin-bottom: 2rem;
+        margin-bottom: 1rem;
         max-width: 800px;
         margin-left: auto;
         margin-right: auto;
         line-height: 1.6;
     }
     
-    /* Expandable sections */
-    .section-container {
+    /* Filter section */
+    .filter-container {
         background: #FFFFFF;
-        border-radius: 16px;
-        margin: 2rem 0;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin: 1.5rem 0;
         box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        overflow: hidden;
-        transition: all 0.3s ease;
     }
     
-    .section-container:hover {
-        box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-    }
-    
-    .section-header {
-        background: linear-gradient(135deg, #007A33 0%, #065F46 100%);
-        color: white;
-        padding: 1.5rem 2rem;
-        margin: 0;
-        cursor: pointer;
-        font-size: 1.5rem;
+    .filter-title {
+        color: #007A33;
+        font-size: 1.3rem;
         font-weight: 700;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        transition: all 0.3s ease;
-    }
-    
-    .section-header:hover {
-        background: linear-gradient(135deg, #065F46 0%, #007A33 100%);
-    }
-    
-    .section-content {
-        padding: 2rem;
-        display: none;
-    }
-    
-    .section-content.expanded {
-        display: block;
-        animation: expandDown 0.3s ease-out;
-    }
-    
-    @keyframes expandDown {
-        from { opacity: 0; transform: translateY(-10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    
-    .expand-icon {
-        font-size: 1.2rem;
-        transition: transform 0.3s ease;
-    }
-    
-    .expand-icon.rotated {
-        transform: rotate(180deg);
+        margin-bottom: 1rem;
     }
     
     /* Cards */
@@ -199,91 +163,14 @@ st.markdown("""
         font-weight: 600;
     }
     
-    /* Image carousel */
-    .carousel-container {
-        text-align: center;
-        background: #F8FAFC;
-        border-radius: 16px;
-        padding: 2rem;
-        margin: 2rem 0;
-    }
-    
-    .carousel-image {
-        max-width: 300px;
-        max-height: 300px;
-        border-radius: 50%;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-        transition: all 0.5s ease;
-    }
-    
-    .carousel-name {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: #007A33;
-        margin-top: 1rem;
-        margin-bottom: 0.5rem;
-    }
-    
-    /* Call to action */
-    .cta-container {
-        background: linear-gradient(135deg, #007A33 0%, #005924 100%);
-        color: white;
-        padding: 3rem 2rem;
-        border-radius: 20px;
-        text-align: center;
-        margin: 3rem 0;
-        box-shadow: 0 12px 32px rgba(0,122,51,0.3);
-    }
-    
-    .cta-button {
-        background: white;
-        color: #007A33;
-        border: none;
-        padding: 15px 30px;
-        border-radius: 30px;
-        font-weight: 700;
-        font-size: 1.1rem;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        margin: 0.5rem;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    }
-    
-    .cta-button:hover {
-        background: #F3F6F4;
-        transform: translateY(-3px);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-    }
-    
     /* Responsive design */
     @media (max-width: 768px) {
-        .hero-title { font-size: 2.5rem; }
-        .hero-subtitle { font-size: 1.1rem; }
+        .hero-title { font-size: 2rem; }
+        .hero-subtitle { font-size: 1rem; }
         .metric-grid { grid-template-columns: 1fr; }
-        .section-header { font-size: 1.3rem; padding: 1rem 1.5rem; }
-        .section-content { padding: 1.5rem; }
     }
 </style>
-
-<script>
-function toggleSection(sectionId) {
-    const content = document.getElementById(sectionId + '-content');
-    const icon = document.getElementById(sectionId + '-icon');
-    
-    if (content.classList.contains('expanded')) {
-        content.classList.remove('expanded');
-        icon.classList.remove('rotated');
-        content.style.display = 'none';
-    } else {
-        content.classList.add('expanded');
-        icon.classList.add('rotated');
-        content.style.display = 'block';
-    }
-}
-</script>
 """, unsafe_allow_html=True)
-
-    
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -385,106 +272,54 @@ def load_map_data():
         logger.error(f"Error in load_map_data: {e}")
         return {key: gpd.GeoDataFrame() for key in ['assembly_gdf', 'senate_gdf', 'calenviro_gdf', 'highways_gdf']}
 
-
+# Generate distinct colors for districts
+def get_district_color(district_num, total_districts, base_hue='green'):
+    """Generate distinct colors for districts"""
+    if base_hue == 'green':
+        # Green spectrum from light to dark
+        hues = np.linspace(120, 150, total_districts)  # Green range in HSL
+    else:  # blue for senate
+        hues = np.linspace(200, 240, total_districts)  # Blue range in HSL
+    
+    idx = district_num % len(hues)
+    h = hues[idx]
+    s = 60 + (district_num % 3) * 15  # Vary saturation
+    l = 45 + (district_num % 4) * 10  # Vary lightness
+    
+    # Convert HSL to RGB
+    c = (1 - abs(2 * l / 100 - 1)) * s / 100
+    x = c * (1 - abs((h / 60) % 2 - 1))
+    m = l / 100 - c / 2
+    
+    if h < 60:
+        r, g, b = c, x, 0
+    elif h < 120:
+        r, g, b = x, c, 0
+    elif h < 180:
+        r, g, b = 0, c, x
+    elif h < 240:
+        r, g, b = 0, x, c
+    elif h < 300:
+        r, g, b = x, 0, c
+    else:
+        r, g, b = c, 0, x
+    
+    r, g, b = int((r + m) * 255), int((g + m) * 255), int((b + m) * 255)
+    return f'#{r:02x}{g:02x}{b:02x}'
 
 # Load data
 df = load_data()
 map_data = load_map_data()
 
-
-# ===== INTERACTIVE MAP SECTION =====
-st.markdown("""
-<div class="section-container">
-    <div class="section-header" onclick="toggleSection('map')">
-        <span>🗺️ Interactive Map</span>
-        <span id="map-icon" class="expand-icon">▼</span>
-    </div>
-    <div id="map-content" class="section-content">
-""", unsafe_allow_html=True)
-
-st.markdown("### 🔍 Explore Highway Project Impacts")
-
-# Enhanced filter controls
-col1, col2, col3, col4 = st.columns(4)
-
-with col1:
-    if not df.empty:
-        counties = ["All Counties"] + sorted(df["County"].dropna().unique().tolist())
-        selected_county = st.selectbox("📍 Filter by County", counties)
-    else:
-        selected_county = "All Counties"
-
-with col2:
-    if not df.empty:
-        routes = ["All Routes"] + sorted(df["Route"].dropna().astype(str).unique().tolist(), key=lambda x: (not x.isdigit(), x))
-        selected_route = st.selectbox("🛣️ Filter by Route", routes)
-    else:
-        selected_route = "All Routes"
-
-with col3:
-    if not df.empty:
-        years = ["All Years"] + sorted(df["CCA_FY"].dropna().astype(str).unique().tolist())
-        selected_year = st.selectbox("📅 Filter by Year", years)
-    else:
-        selected_year = "All Years"
-
-with col4:
-    impact_filter = st.selectbox("🎯 Impact Level",
-                                ["All Projects", "High Impact (100+)",
-                                 "Medium Impact (20-100)", "Low Impact (1-20)", "No Impact"])
-
-# Map layer controls
-st.markdown("#### 🎨 Map Layers")
-layer_cols = st.columns(4)
-
-with layer_cols[0]:
-    show_highways = st.checkbox("🛣️ CA Highways", value=True)
-with layer_cols[1]:
-    show_assembly = st.checkbox("🏛️ Assembly Districts", value=True)
-with layer_cols[2]:
-    show_senate = st.checkbox("🏛️ Senate Districts", value=True)
-with layer_cols[3]:
-    show_calenviro = st.checkbox("🌍 CalEnviroScreen", value=False)
-
-# Apply filters and create map
+# INITIAL MAP DISPLAY - NO FILTERS APPLIED YET (show all data)
 if not df.empty:
-    filtered_df = df.copy()
-    
-    if selected_county != "All Counties":
-        filtered_df = filtered_df[filtered_df["County"] == selected_county]
-    
-    if selected_route != "All Routes":
-        try:
-            sel_num = int(selected_route)
-            filtered_df = filtered_df[filtered_df["Route"] == sel_num]
-        except:
-            filtered_df = filtered_df[filtered_df["Route"].astype(str) == selected_route]
-    
-    if selected_year != "All Years":
-        try:
-            sel_year = int(selected_year)
-            filtered_df = filtered_df[filtered_df["CCA_FY"] == sel_year]
-        except:
-            filtered_df = filtered_df[filtered_df["CCA_FY"].astype(str) == selected_year]
-    
-    # Apply impact filter
-    if impact_filter != "All Projects":
-        if impact_filter == "High Impact (100+)":
-            filtered_df = filtered_df[filtered_df["Total_Relocations"].fillna(0) >= 100]
-        elif impact_filter == "Medium Impact (20-100)":
-            filtered_df = filtered_df[(filtered_df["Total_Relocations"].fillna(0) >= 20) &
-                                     (filtered_df["Total_Relocations"].fillna(0) < 100)]
-        elif impact_filter == "Low Impact (1-20)":
-            filtered_df = filtered_df[(filtered_df["Total_Relocations"].fillna(0) >= 1) &
-                                     (filtered_df["Total_Relocations"].fillna(0) < 20)]
-        elif impact_filter == "No Impact":
-            filtered_df = filtered_df[filtered_df["Total_Relocations"].fillna(0) == 0]
+    initial_df = df.copy()
     
     # Create map
-    if not filtered_df[filtered_df['latitude'].notnull()].empty:
-        center_lat = float(filtered_df.loc[filtered_df['latitude'].notnull(), 'latitude'].mean())
-        center_lng = float(filtered_df.loc[filtered_df['longitude'].notnull(), 'longitude'].mean())
-        zoom_start = 7
+    if not initial_df[initial_df['latitude'].notnull()].empty:
+        center_lat = float(initial_df.loc[initial_df['latitude'].notnull(), 'latitude'].mean())
+        center_lng = float(initial_df.loc[initial_df['longitude'].notnull(), 'longitude'].mean())
+        zoom_start = 6
     else:
         center_lat, center_lng, zoom_start = 37.2, -119.5, 6
     
@@ -506,118 +341,148 @@ if not df.empty:
         except Exception:
             return None
     
-    # Add selected layers (safe checks + conversion)
-    if show_highways and 'highways_gdf' in map_data and not map_data['highways_gdf'].empty:
-        highways_gdf = map_data['highways_gdf']
-        geojson_obj = _gdf_to_geojson(highways_gdf)
-        if geojson_obj and geojson_obj.get("features"):
-            tooltip_fields = []
-            tooltip_aliases = []
-            if 'FULLNAME' in highways_gdf.columns:
-                tooltip_fields = ['FULLNAME']
-                tooltip_aliases = ['Highway:']
-            
-            folium.GeoJson(
-                data=geojson_obj,
-                name="CA Highways",
-                style_function=lambda feat: {
-                    'color': '#4B5563',  # muted slate
-                    'weight': 2,
-                    'opacity': 0.8
-                },
-                tooltip=folium.GeoJsonTooltip(
-                    fields=tooltip_fields,
-                    aliases=tooltip_aliases,
-                    localize=True,
-                    sticky=False,
-                    labels=True,
-                    style="background-color: white; color: #111827; font-size: 12px; padding: 6px;"
-                ) if tooltip_fields else None
-            ).add_to(m)
-    
-    # Add CalEnviroScreen layer
-    if show_calenviro and 'calenviro_gdf' in map_data and not map_data['calenviro_gdf'].empty:
-        calenviro_gdf = map_data['calenviro_gdf']
-        geojson_obj = _gdf_to_geojson(calenviro_gdf)
-        if geojson_obj and geojson_obj.get("features"):
-            def ces_style_function(feature):
-                props = feature.get('properties', {}) or {}
-                score = props.get('CES_SCORE', None)
-                try:
-                    score = float(score)
-                except Exception:
-                    score = None
-                # Use a green-tinged palette but still indicate burden
-                if score is None:
-                    fill = '#E6F4EC'
-                elif score < 25:
-                    fill = '#E6F4EC'   # light green
-                elif score < 50:
-                    fill = '#C7E7D0'
-                elif score < 75:
-                    fill = '#7FC08A'
-                else:
-                    fill = '#007A33'
-                return {
-                    'fillColor': fill,
-                    'color': '#1F2937',
-                    'weight': 0.5,
-                    'fillOpacity': 0.6
-                }
-            
-            tooltip_fields = []
-            tooltip_aliases = []
-            if 'CES_SCORE' in calenviro_gdf.columns:
-                tooltip_fields.append('CES_SCORE'); tooltip_aliases.append('Environmental Burden Score:')
-            if 'TRACT' in calenviro_gdf.columns:
-                tooltip_fields.append('TRACT'); tooltip_aliases.append('Census Tract:')
-            
-            folium.GeoJson(
-                data=geojson_obj,
-                name="CalEnviroScreen Scores",
-                style_function=ces_style_function,
-                tooltip=folium.GeoJsonTooltip(
-                    fields=tooltip_fields,
-                    aliases=tooltip_aliases,
-                    localize=True,
-                    sticky=False,
-                    labels=True,
-                    style="background-color: white; color: #111827; font-size: 12px; padding: 6px;"
-                ) if tooltip_fields else None
-            ).add_to(m)
-    
-    # Add district boundaries
-    if show_assembly and 'assembly_gdf' in map_data and not map_data['assembly_gdf'].empty:
+    # Add district boundaries with NUMBERS and DISTINCT COLORS
+    if 'assembly_gdf' in map_data and not map_data['assembly_gdf'].empty:
         assembly_gdf = map_data['assembly_gdf']
+        
+        # # Debug: print available columns
+        # st.write("Assembly columns:", assembly_gdf.columns.tolist())
+        
         geojson_obj = _gdf_to_geojson(assembly_gdf)
         if geojson_obj and geojson_obj.get("features"):
+            # Detect district number field - check all possible field names
+            district_field = None
+            for field in ['DISTRICT', 'District', 'district', 'AD', 'NAME', 'NAMELSAD', 'SLDLST', 'GEOID']:
+                if field in assembly_gdf.columns:
+                    district_field = field
+                    # st.write(f"Using Assembly field: {field}")
+                    break
+            
+            if not district_field and len(assembly_gdf.columns) > 1:
+                # Use second column if first is geometry
+                cols = [c for c in assembly_gdf.columns if c != 'geometry']
+                if cols:
+                    district_field = cols[0]
+                    # st.write(f"Defaulting to Assembly field: {district_field}")
+            
+            total_districts = len(assembly_gdf)
+            
+            # Create color mapping
+            assembly_colors = {}
+            for idx, row in assembly_gdf.iterrows():
+                if district_field:
+                    try:
+                        dist_val = row[district_field]
+                        dist_num = int(float(str(dist_val).replace('Assembly District ', '').replace('AD', '').strip()))
+                        assembly_colors[dist_val] = get_district_color(dist_num, 80, 'green')
+                    except:
+                        assembly_colors[row[district_field]] = '#90EE90'
+            
+            def assembly_style_function(feature):
+                props = feature.get('properties', {}) or {}
+                if district_field:
+                    dist_val = props.get(district_field, 'Unknown')
+                    color = assembly_colors.get(dist_val, '#90EE90')
+                else:
+                    color = '#90EE90'
+                
+                return {
+                    'fillColor': color,
+                    'color': '#006622',
+                    'weight': 2.5,
+                    'opacity': 0.9,
+                    'fillOpacity': 0.5
+                }
+            
+            tooltip_fields = [district_field] if district_field else []
+            tooltip_aliases = ['Assembly District:'] if district_field else []
+            
             folium.GeoJson(
                 data=geojson_obj,
                 name="Assembly Districts",
-                style_function=lambda feat: {
-                    'fillColor': 'transparent',
-                    'color': '#007A33',
-                    'weight': 2,
-                    'opacity': 0.8
-                }
+                style_function=assembly_style_function,
+                highlight_function=lambda x: {'weight': 4, 'fillOpacity': 0.7},
+                tooltip=folium.GeoJsonTooltip(
+                    fields=tooltip_fields,
+                    aliases=tooltip_aliases,
+                    localize=True,
+                    sticky=False,
+                    labels=True,
+                    style="background-color: white; color: #111827; font-size: 16px; font-weight: bold; padding: 10px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);"
+                ) if tooltip_fields else None
             ).add_to(m)
     
-    if show_senate and 'senate_gdf' in map_data and not map_data['senate_gdf'].empty:
+    if 'senate_gdf' in map_data and not map_data['senate_gdf'].empty:
         senate_gdf = map_data['senate_gdf']
+        
+        # # Debug: print available columns
+        # st.write("Senate columns:", senate_gdf.columns.tolist())
+        
         geojson_obj = _gdf_to_geojson(senate_gdf)
         if geojson_obj and geojson_obj.get("features"):
+            # Detect district number field
+            district_field = None
+            for field in ['DISTRICT', 'District', 'district', 'SD', 'NAME', 'NAMELSAD', 'SLDUST', 'GEOID']:
+                if field in senate_gdf.columns:
+                    district_field = field
+                    # st.write(f"Using Senate field: {field}")
+                    break
+            
+            if not district_field and len(senate_gdf.columns) > 1:
+                # Use second column if first is geometry
+                cols = [c for c in senate_gdf.columns if c != 'geometry']
+                if cols:
+                    district_field = cols[0]
+                    st.write(f"Defaulting to Senate field: {district_field}")
+            
+            total_districts = len(senate_gdf)
+            
+            # Create color mapping
+            senate_colors = {}
+            for idx, row in senate_gdf.iterrows():
+                if district_field:
+                    try:
+                        dist_val = row[district_field]
+                        dist_num = int(float(str(dist_val).replace('Senate District ', '').replace('SD', '').strip()))
+                        senate_colors[dist_val] = get_district_color(dist_num, 40, 'blue')
+                    except:
+                        senate_colors[row[district_field]] = '#87CEEB'
+            
+            def senate_style_function(feature):
+                props = feature.get('properties', {}) or {}
+                if district_field:
+                    dist_val = props.get(district_field, 'Unknown')
+                    color = senate_colors.get(dist_val, '#87CEEB')
+                else:
+                    color = '#87CEEB'
+                
+                return {
+                    'fillColor': color,
+                    'color': '#1e40af',
+                    'weight': 2.5,
+                    'opacity': 0.9,
+                    'fillOpacity': 0.45
+                }
+            
+            tooltip_fields = [district_field] if district_field else []
+            tooltip_aliases = ['Senate District:'] if district_field else []
+            
             folium.GeoJson(
                 data=geojson_obj,
                 name="Senate Districts",
-                style_function=lambda feat: {
-                    'fillColor': 'transparent',
-                    'color': '#065F46',
-                    'weight': 2,
-                    'opacity': 0.8
-                }
+                style_function=senate_style_function,
+                highlight_function=lambda x: {'weight': 4, 'fillOpacity': 0.7},
+                tooltip=folium.GeoJsonTooltip(
+                    fields=tooltip_fields,
+                    aliases=tooltip_aliases,
+                    localize=True,
+                    sticky=False,
+                    labels=True,
+                    style="background-color: white; color: #111827; font-size: 16px; font-weight: bold; padding: 10px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);"
+                ) if tooltip_fields else None
             ).add_to(m)
     
-    # Add project markers with enhanced clustering (brand green cluster)
+    # Add project markers with enhanced clustering
     icon_create_fn = (
         "function(cluster) {"
         "  var count = cluster.getChildCount();"
@@ -639,8 +504,7 @@ if not df.empty:
         icon_create_function=icon_create_fn
     ).add_to(m)
     
-    valid_locations = 0
-    for _, row in filtered_df.iterrows():
+    for _, row in initial_df.iterrows():
         lat = row.get('latitude')
         lng = row.get('longitude')
         
@@ -651,23 +515,21 @@ if not df.empty:
             lat, lng = None, None
         
         if lat is not None and lng is not None:
-            valid_locations += 1
-            
             impact = int(row.get('Total_Relocations') or 0)
             if impact >= 100:
-                mcolor = '#9B1C1C'   # deep red for very high impact
+                mcolor = '#9B1C1C'
             elif impact >= 20:
-                mcolor = '#D97706'   # amber
+                mcolor = '#D97706'
             elif impact > 0:
-                mcolor = '#F59E0B'   # yellow-amber
+                mcolor = '#F59E0B'
             else:
-                mcolor = '#007A33'   # green for no impact
+                mcolor = '#007A33'
             
-            proj_id = row.get('Project') or row.get('Project_ID') or row.get('PROJECT_ID') or 'Unknown'
-            location_text = row.get('Project_Location') or row.get('Location') or 'N/A'
+            proj_id = row.get('Project') or 'Unknown'
+            location_text = row.get('Project_Location') or 'N/A'
             county_text = row.get('County') or 'N/A'
             route_text = row.get('Route') or 'N/A'
-            year_text = row.get('CCA_FY') or row.get('Year') or 'N/A'
+            year_text = row.get('CCA_FY') or 'N/A'
             homes_dem = int(row.get('Num_Home_Demolished') or 0)
             bus_dem = int(row.get('Num_Business_Demolished') or 0)
             total_rel = int(row.get('Total_Relocations') or 0)
@@ -689,7 +551,6 @@ if not df.empty:
             </div>
             """
             
-            # Use a CircleMarker for consistent styling
             folium.CircleMarker(
                 location=[lat, lng],
                 radius=8 if impact == 0 else min(18, 6 + int((impact ** 0.5) / 1.5)),
@@ -698,115 +559,143 @@ if not df.empty:
                 fill_color=mcolor,
                 fill_opacity=0.9,
                 popup=folium.Popup(popup_content, max_width=360),
-                tooltip=f"Project {proj_id} — {total_rel} displacements"
+                tooltip=f"Project {proj_id} – {total_rel} displacements"
             ).add_to(marker_cluster)
     
     # Add layer control
     folium.LayerControl(collapsed=False).add_to(m)
     
-    # Display map with error handling
+    # Display map - FULL WIDTH
     try:
-        map_data_result = st_folium(m, width=1200, height=700, returned_objects=["last_object_clicked"])
-    except AssertionError as e:
-        st.error("Map rendering encountered an issue (likely GeoJSON/data mismatch). Showing fallback map view.")
-        try:
-            # Fallback: create a simple map without the problematic layers
-            simple_m = folium.Map(
-                location=[center_lat, center_lng],
-                zoom_start=zoom_start,
-                tiles='CartoDB positron'
-            )
-            # Add only the project markers
-            for _, row in filtered_df.iterrows():
-                lat = row.get('latitude')
-                lng = row.get('longitude')
-                if pd.notnull(lat) and pd.notnull(lng):
-                    folium.CircleMarker(
-                        location=[float(lat), float(lng)],
-                        radius=8,
-                        color='#007A33',
-                        fill=True,
-                        popup=f"Project {row.get('Project', 'Unknown')}"
-                    ).add_to(simple_m)
-            st_folium(simple_m, width=1200, height=600)
-        except Exception:
-            st.error("Unable to render map. Please check data files.")
+        st_folium(m, width=None, height=800, returned_objects=["last_object_clicked"])
     except Exception as ex:
-        st.error("Unexpected error rendering map.")
+        st.error("Error rendering map.")
         logger.error(f"Map error: {ex}")
 
-st.markdown("</div></div>", unsafe_allow_html=True)
+# # NOW SHOW FILTERS AFTER THE MAP
+# st.markdown('<div class="filter-container">', unsafe_allow_html=True)
+st.markdown('<div class="filter-title">🔍 Explore & Filter Highway Projects</div>', unsafe_allow_html=True)
 
+# All filters in one row
+filter_cols = st.columns([2, 1.5, 1.5, 1.5, 1.5, 1.5])
 
-# ===== DATA DASHBOARD SECTION =====
-st.markdown("""
-<div class="section-container">
-    <div class="section-header" onclick="toggleSection('dashboard')">
-        <span>📊 Data Dashboard</span>
-        <span id="dashboard-icon" class="expand-icon">▼</span>
-    </div>
-    <div id="dashboard-content" class="section-content">
-""", unsafe_allow_html=True)
+with filter_cols[0]:
+    search_text = st.text_input("🔎 Search", placeholder="Search projects, locations...", key="unified_search")
 
-st.markdown("### 🔍 Search & Filter Projects")
-
-# Enhanced search and filtering
-col1, col2, col3, col4 = st.columns(4)
-
-with col1:
-    search_text = st.text_input("🔎 Search Projects", placeholder="Enter Project or location...")
-
-with col2:
+with filter_cols[1]:
     if not df.empty:
         counties = ["All Counties"] + sorted(df["County"].dropna().unique().tolist())
-        filter_county = st.selectbox("📍 County Filter", counties, key="dash_county")
+        selected_county = st.selectbox("📍 County", counties, key="unified_county")
     else:
-        filter_county = "All Counties"
+        selected_county = "All Counties"
 
-with col3:
+with filter_cols[2]:
     if not df.empty:
-        routes = ["All Routes"] + sorted([str(r) for r in df["Route"].dropna().unique()])
-        filter_route = st.selectbox("🛣️ Route Filter", routes, key="dash_route")
+        routes = ["All Routes"] + sorted(df["Route"].dropna().astype(str).unique().tolist(), key=lambda x: (not x.isdigit(), x))
+        selected_route = st.selectbox("🛣️ Route", routes, key="unified_route")
     else:
-        filter_route = "All Routes"
+        selected_route = "All Routes"
 
-with col4:
+with filter_cols[3]:
     if not df.empty:
-        years = ["All Years"] + sorted([str(y) for y in df["CCA_FY"].dropna().unique()])
-        filter_year = st.selectbox("📅 Year Filter", years, key="dash_year")
+        years = ["All Years"] + sorted(df["CCA_FY"].dropna().astype(str).unique().tolist())
+        selected_year = st.selectbox("📅 Year", years, key="unified_year")
     else:
-        filter_year = "All Years"
+        selected_year = "All Years"
 
-# Apply filters
+with filter_cols[4]:
+    impact_filter = st.selectbox("🎯 Impact Level",
+                                ["All Projects", "High Impact (100+)",
+                                 "Medium Impact (20-100)", "Low Impact (1-20)", "No Impact"],
+                                key="unified_impact")
+
+with filter_cols[5]:
+    sort_by = st.selectbox("📊 Sort By",
+                          ["Total Relocations", "Year", "County", "Route"],
+                          key="unified_sort")
+
+# Map layer controls
+st.markdown("#### 🎨 Map Layers")
+layer_cols = st.columns(4)
+
+with layer_cols[0]:
+    show_assembly = st.checkbox("🏛️ Assembly Districts", value=True)
+with layer_cols[1]:
+    show_senate = st.checkbox("🏛️ Senate Districts", value=True)
+
+st.markdown('</div>', unsafe_allow_html=True)
+
+# Apply all filters
 if not df.empty:
-    display_df = df.copy()
+    filtered_df = df.copy()
     
+    # Apply search filter
     if search_text:
-        search_mask = display_df.apply(
+        search_mask = filtered_df.apply(
             lambda row: any(
                 str(search_text).lower() in str(val).lower() 
                 for val in row.values if pd.notnull(val)
             ), axis=1
         )
-        display_df = display_df[search_mask]
+        filtered_df = filtered_df[search_mask]
     
-    if filter_county != "All Counties":
-        display_df = display_df[display_df["County"] == filter_county]
+    # Apply county filter
+    if selected_county != "All Counties":
+        filtered_df = filtered_df[filtered_df["County"] == selected_county]
     
-    if filter_route != "All Routes":
+    # Apply route filter
+    if selected_route != "All Routes":
         try:
-            display_df = display_df[display_df["Route"] == int(filter_route)]
+            sel_num = int(selected_route)
+            filtered_df = filtered_df[filtered_df["Route"] == sel_num]
         except:
-            display_df = display_df[display_df["Route"].astype(str) == filter_route]
+            filtered_df = filtered_df[filtered_df["Route"].astype(str) == selected_route]
     
-    if filter_year != "All Years":
+    # Apply year filter
+    if selected_year != "All Years":
         try:
-            display_df = display_df[display_df["CCA_FY"] == int(filter_year)]
+            sel_year = int(selected_year)
+            filtered_df = filtered_df[filtered_df["CCA_FY"] == sel_year]
         except:
-            display_df = display_df[display_df["CCA_FY"].astype(str) == filter_year]
+            filtered_df = filtered_df[filtered_df["CCA_FY"].astype(str) == selected_year]
     
+    # Apply impact filter
+    if impact_filter != "All Projects":
+        if impact_filter == "High Impact (100+)":
+            filtered_df = filtered_df[filtered_df["Total_Relocations"].fillna(0) >= 100]
+        elif impact_filter == "Medium Impact (20-100)":
+            filtered_df = filtered_df[(filtered_df["Total_Relocations"].fillna(0) >= 20) &
+                                     (filtered_df["Total_Relocations"].fillna(0) < 100)]
+        elif impact_filter == "Low Impact (1-20)":
+            filtered_df = filtered_df[(filtered_df["Total_Relocations"].fillna(0) >= 1) &
+                                     (filtered_df["Total_Relocations"].fillna(0) < 20)]
+        elif impact_filter == "No Impact":
+            filtered_df = filtered_df[filtered_df["Total_Relocations"].fillna(0) == 0]
     
-    # Enhanced data table
+    # Apply sorting
+    if sort_by == "Total Relocations":
+        filtered_df = filtered_df.sort_values("Total_Relocations", ascending=False)
+    elif sort_by == "Year":
+        filtered_df = filtered_df.sort_values("CCA_FY", ascending=False)
+    elif sort_by == "County":
+        filtered_df = filtered_df.sort_values("County")
+    elif sort_by == "Route":
+        filtered_df = filtered_df.sort_values("Route")
+    
+    # # Display summary metrics
+    # st.markdown("### 📊 Summary Statistics")
+    # metric_cols = st.columns(4)
+    
+    # with metric_cols[0]:
+    #     st.metric("Projects Found", len(filtered_df))
+    # with metric_cols[1]:
+    #     st.metric("Total Homes Demolished", int(filtered_df["Num_Home_Demolished"].sum()))
+    # with metric_cols[2]:
+    #     st.metric("Total Businesses Demolished", int(filtered_df["Num_Business_Demolished"].sum()))
+    # with metric_cols[3]:
+    #     st.metric("Total Relocations", int(filtered_df["Total_Relocations"].sum()))
+    
+    # Enhanced data table BELOW THE MAP
     st.markdown("### 📋 Project Details")
     
     # Select columns for display
@@ -814,11 +703,11 @@ if not df.empty:
         'Project', 'County', 'Route', 'CCA_FY', 'Project_Location',
         'Num_Home_Demolished', 'Num_Business_Demolished', 'Total_Relocations'
     ]
-    available_columns = [col for col in display_columns if col in display_df.columns]
+    available_columns = [col for col in display_columns if col in filtered_df.columns]
     
     # Enhanced dataframe with styling
-    if available_columns and not display_df.empty:
-        styled_df = display_df[available_columns].style.format({
+    if available_columns and not filtered_df.empty:
+        styled_df = filtered_df[available_columns].style.format({
             'Num_Home_Demolished': '{:.0f}',
             'Num_Business_Demolished': '{:.0f}',
             'Total_Relocations': '{:.0f}'
@@ -826,66 +715,7 @@ if not df.empty:
             subset=['Total_Relocations'], 
             cmap='Reds', 
             vmin=0, 
-            vmax=display_df['Total_Relocations'].max() if display_df['Total_Relocations'].max() > 0 else 1
+            vmax=filtered_df['Total_Relocations'].max() if filtered_df['Total_Relocations'].max() > 0 else 1
         )
         
         st.dataframe(styled_df, use_container_width=True, height=400)
-        
-        # Download functionality
-        col1, col2 = st.columns(2)
-        with col1:
-            csv = display_df[available_columns].to_csv(index=False)
-            st.download_button(
-                label="📥 Download as CSV",
-                data=csv,
-                file_name=f"highway_projects_{datetime.now().strftime('%Y%m%d')}.csv",
-                mime="text/csv",
-                use_container_width=True
-            )
-        
-        with col2:
-            # Export to CSV instead of Excel to avoid openpyxl dependency
-            csv_buffer = io.StringIO()
-            display_df[available_columns].to_csv(csv_buffer, index=False)
-            
-            st.download_button(
-                label="📥 Download as CSV (Alternative)",
-                data=csv_buffer.getvalue(),
-                file_name=f"highway_projects_{datetime.now().strftime('%Y%m%d')}_alt.csv",
-                mime="text/csv",
-                use_container_width=True
-            )
-    else:
-        st.info("No project data available to display.")
-
-else:
-    st.info("No data available. Please check that the data file is loaded correctly.")
-
-st.markdown("</div></div>", unsafe_allow_html=True)
-
-# Social Media Icons
-from st_social_media_links import SocialMediaIcons
-social_media_links = [
-    "https://www.linkedin.com/company/thegreenlininginstitute-/",
-    "https://www.instagram.com/greenlining/",
-    "https://www.facebook.com/Greenlining/",
-    "https://www.youtube.com/channel/UCKxMsA3yBiLiz_3g-dTiFIg",
-    "https://twitter.com/greenlining/",
-    "https://www.tiktok.com/@greenlining",
-]
-
-social_media_icons = SocialMediaIcons(social_media_links)
-# social_media_icons.render(sidebar=True, justify_content="center")
-
-st.divider()
-st.write("")
-
-social_media_icons = SocialMediaIcons(social_media_links) 
-social_media_icons.render(sidebar=False, justify_content="center")
-
-
-
-
-st.markdown("</div></div>", unsafe_allow_html=True)
-
-
