@@ -1,6 +1,3 @@
-
-
-
 # Standard libraries
 import os
 import time
@@ -276,17 +273,15 @@ def load_map_data():
 def get_district_color(district_num, total_districts, base_hue='green'):
     """Generate distinct colors for districts"""
     if base_hue == 'green':
-        # Green spectrum from light to dark
-        hues = np.linspace(120, 150, total_districts)  # Green range in HSL
-    else:  # blue for senate
-        hues = np.linspace(200, 240, total_districts)  # Blue range in HSL
+        hues = np.linspace(120, 150, total_districts)
+    else:
+        hues = np.linspace(200, 240, total_districts)
     
     idx = district_num % len(hues)
     h = hues[idx]
-    s = 60 + (district_num % 3) * 15  # Vary saturation
-    l = 45 + (district_num % 4) * 10  # Vary lightness
+    s = 60 + (district_num % 3) * 15
+    l = 45 + (district_num % 4) * 10
     
-    # Convert HSL to RGB
     c = (1 - abs(2 * l / 100 - 1)) * s / 100
     x = c * (1 - abs((h / 60) % 2 - 1))
     m = l / 100 - c / 2
@@ -311,19 +306,157 @@ def get_district_color(district_num, total_districts, base_hue='green'):
 df = load_data()
 map_data = load_map_data()
 
-# INITIAL MAP DISPLAY - NO FILTERS APPLIED YET (show all data)
+# Initialize session state to prevent reruns on map interactions
+if 'map_rendered' not in st.session_state:
+    st.session_state.map_rendered = False
+
+# SHOW MAP TITLE FIRST
+st.markdown("### 🗺️ Highway Projects Map")
+
+# We'll create a placeholder for the map and update it after getting filter values
+map_placeholder = st.empty()
+
+# SHOW FILTERS BELOW
+st.markdown('<div class="filter-title">🔍 Explore & Filter Highway Projects</div>', unsafe_allow_html=True)
+
+# All filters in two rows
+filter_row1 = st.columns([1.5, 1.5, 1.5, 1.5, 1.5, 1.5])
+
+with filter_row1[0]:
+    if not df.empty:
+        assembly_cols = [col for col in df.columns if col.startswith('Assemblymember')]
+        all_assembly = []
+        for col in assembly_cols:
+            all_assembly.extend(df[col].dropna().unique().tolist())
+        all_assembly = sorted(list(set(all_assembly)))
+        assembly_members = ["All Assembly Members"] + all_assembly
+        selected_assembly = st.selectbox("🏛️ Assembly Member", assembly_members, key="unified_assembly")
+    else:
+        selected_assembly = "All Assembly Members"
+
+with filter_row1[1]:
+    if not df.empty:
+        senator_cols = [col for col in df.columns if col.startswith('Senator')]
+        all_senators = []
+        for col in senator_cols:
+            all_senators.extend(df[col].dropna().unique().tolist())
+        all_senators = sorted(list(set(all_senators)))
+        senators = ["All Senators"] + all_senators
+        selected_senate = st.selectbox("🏛️ Senator", senators, key="unified_senate")
+    else:
+        selected_senate = "All Senators"
+
+with filter_row1[2]:
+    if not df.empty:
+        counties = ["All Counties"] + sorted(df["County"].dropna().unique().tolist())
+        selected_county = st.selectbox("📍 County", counties, key="unified_county")
+    else:
+        selected_county = "All Counties"
+
+with filter_row1[3]:
+    if not df.empty:
+        routes = ["All Routes"] + sorted(df["Route"].dropna().astype(str).unique().tolist(), key=lambda x: (not x.isdigit(), x))
+        selected_route = st.selectbox("🛣️ Route", routes, key="unified_route")
+    else:
+        selected_route = "All Routes"
+
+with filter_row1[4]:
+    if not df.empty:
+        years = ["All Years"] + sorted(df["CCA_FY"].dropna().astype(str).unique().tolist())
+        selected_year = st.selectbox("📅 Year", years, key="unified_year")
+    else:
+        selected_year = "All Years"
+
+with filter_row1[5]:
+    impact_filter = st.selectbox("🎯 Impact Level",
+                                ["All Projects", "High Impact (100+)",
+                                 "Medium Impact (20-100)", "Low Impact (1-20)", "No Impact"],
+                                key="unified_impact")
+
+filter_row2 = st.columns([2, 1.5, 5])
+
+with filter_row2[0]:
+    sort_by = st.selectbox("📊 Sort By",
+                          ["Total Relocations", "Homes Demolished", "Businesses Demolished", 
+                           "Year", "County", "Route"],
+                          key="unified_sort")
+
+st.markdown("#### 🎨 Map Layers")
+layer_cols = st.columns(4)
+
+with layer_cols[0]:
+    show_assembly = st.checkbox("🏛️ Assembly Districts", value=True)
+with layer_cols[1]:
+    show_senate = st.checkbox("🏛️ Senate Districts", value=True)
+with layer_cols[2]:
+    show_highways = st.checkbox("Highways", value=False)
+
+st.markdown('</div>', unsafe_allow_html=True)
+
+# Apply all filters
 if not df.empty:
-    initial_df = df.copy()
+    filtered_df = df.copy()
     
-    # Create map
-    if not initial_df[initial_df['latitude'].notnull()].empty:
-        center_lat = float(initial_df.loc[initial_df['latitude'].notnull(), 'latitude'].mean())
-        center_lng = float(initial_df.loc[initial_df['longitude'].notnull(), 'longitude'].mean())
+    if selected_assembly != "All Assembly Members":
+        assembly_cols = [col for col in filtered_df.columns if col.startswith('Assemblymember')]
+        mask = filtered_df[assembly_cols].apply(lambda row: selected_assembly in row.values, axis=1)
+        filtered_df = filtered_df[mask]
+    
+    if selected_senate != "All Senators":
+        senator_cols = [col for col in filtered_df.columns if col.startswith('Senator')]
+        mask = filtered_df[senator_cols].apply(lambda row: selected_senate in row.values, axis=1)
+        filtered_df = filtered_df[mask]
+    
+    if selected_county != "All Counties":
+        filtered_df = filtered_df[filtered_df["County"] == selected_county]
+    
+    if selected_route != "All Routes":
+        try:
+            sel_num = int(selected_route)
+            filtered_df = filtered_df[filtered_df["Route"] == sel_num]
+        except:
+            filtered_df = filtered_df[filtered_df["Route"].astype(str) == selected_route]
+    
+    if selected_year != "All Years":
+        try:
+            sel_year = int(selected_year)
+            filtered_df = filtered_df[filtered_df["CCA_FY"] == sel_year]
+        except:
+            filtered_df = filtered_df[filtered_df["CCA_FY"].astype(str) == selected_year]
+    
+    if impact_filter != "All Projects":
+        if impact_filter == "High Impact (100+)":
+            filtered_df = filtered_df[filtered_df["Total_Relocations"].fillna(0) >= 100]
+        elif impact_filter == "Medium Impact (20-100)":
+            filtered_df = filtered_df[(filtered_df["Total_Relocations"].fillna(0) >= 20) &
+                                     (filtered_df["Total_Relocations"].fillna(0) < 100)]
+        elif impact_filter == "Low Impact (1-20)":
+            filtered_df = filtered_df[(filtered_df["Total_Relocations"].fillna(0) >= 1) &
+                                     (filtered_df["Total_Relocations"].fillna(0) < 20)]
+        elif impact_filter == "No Impact":
+            filtered_df = filtered_df[filtered_df["Total_Relocations"].fillna(0) == 0]
+    
+    if sort_by == "Total Relocations":
+        filtered_df = filtered_df.sort_values("Total_Relocations", ascending=False)
+    elif sort_by == "Homes Demolished":
+        filtered_df = filtered_df.sort_values("Num_Home_Demolished", ascending=False)
+    elif sort_by == "Businesses Demolished":
+        filtered_df = filtered_df.sort_values("Num_Business_Demolished", ascending=False)
+    elif sort_by == "Year":
+        filtered_df = filtered_df.sort_values("CCA_FY", ascending=False)
+    elif sort_by == "County":
+        filtered_df = filtered_df.sort_values("County")
+    elif sort_by == "Route":
+        filtered_df = filtered_df.sort_values("Route")
+    
+    # CREATE MAP WITH FILTERED DATA
+    if not filtered_df[filtered_df['latitude'].notnull()].empty:
+        center_lat = float(filtered_df.loc[filtered_df['latitude'].notnull(), 'latitude'].mean())
+        center_lng = float(filtered_df.loc[filtered_df['longitude'].notnull(), 'longitude'].mean())
         zoom_start = 6
     else:
         center_lat, center_lng, zoom_start = 37.2, -119.5, 6
     
-    # Enhanced folium map with better styling
     m = folium.Map(
         location=[center_lat, center_lng],
         zoom_start=zoom_start,
@@ -331,7 +464,6 @@ if not df.empty:
         prefer_canvas=True
     )
     
-    # Helper function to safely convert GeoDataFrame to GeoJSON
     def _gdf_to_geojson(gdf):
         try:
             if hasattr(gdf, "to_json"):
@@ -341,33 +473,22 @@ if not df.empty:
         except Exception:
             return None
     
-    # Add district boundaries with NUMBERS and DISTINCT COLORS
-    if 'assembly_gdf' in map_data and not map_data['assembly_gdf'].empty:
+    if show_assembly and 'assembly_gdf' in map_data and not map_data['assembly_gdf'].empty:
         assembly_gdf = map_data['assembly_gdf']
-        
-        # # Debug: print available columns
-        # st.write("Assembly columns:", assembly_gdf.columns.tolist())
-        
         geojson_obj = _gdf_to_geojson(assembly_gdf)
         if geojson_obj and geojson_obj.get("features"):
-            # Detect district number field - check all possible field names
             district_field = None
             for field in ['DISTRICT', 'District', 'district', 'AD', 'NAME', 'NAMELSAD', 'SLDLST', 'GEOID']:
                 if field in assembly_gdf.columns:
                     district_field = field
-                    # st.write(f"Using Assembly field: {field}")
                     break
             
             if not district_field and len(assembly_gdf.columns) > 1:
-                # Use second column if first is geometry
                 cols = [c for c in assembly_gdf.columns if c != 'geometry']
                 if cols:
                     district_field = cols[0]
-                    # st.write(f"Defaulting to Assembly field: {district_field}")
             
             total_districts = len(assembly_gdf)
-            
-            # Create color mapping
             assembly_colors = {}
             for idx, row in assembly_gdf.iterrows():
                 if district_field:
@@ -412,32 +533,22 @@ if not df.empty:
                 ) if tooltip_fields else None
             ).add_to(m)
     
-    if 'senate_gdf' in map_data and not map_data['senate_gdf'].empty:
+    if show_senate and 'senate_gdf' in map_data and not map_data['senate_gdf'].empty:
         senate_gdf = map_data['senate_gdf']
-        
-        # # Debug: print available columns
-        # st.write("Senate columns:", senate_gdf.columns.tolist())
-        
         geojson_obj = _gdf_to_geojson(senate_gdf)
         if geojson_obj and geojson_obj.get("features"):
-            # Detect district number field
             district_field = None
             for field in ['DISTRICT', 'District', 'district', 'SD', 'NAME', 'NAMELSAD', 'SLDUST', 'GEOID']:
                 if field in senate_gdf.columns:
                     district_field = field
-                    # st.write(f"Using Senate field: {field}")
                     break
             
             if not district_field and len(senate_gdf.columns) > 1:
-                # Use second column if first is geometry
                 cols = [c for c in senate_gdf.columns if c != 'geometry']
                 if cols:
                     district_field = cols[0]
-                    st.write(f"Defaulting to Senate field: {district_field}")
             
             total_districts = len(senate_gdf)
-            
-            # Create color mapping
             senate_colors = {}
             for idx, row in senate_gdf.iterrows():
                 if district_field:
@@ -482,7 +593,31 @@ if not df.empty:
                 ) if tooltip_fields else None
             ).add_to(m)
     
-    # Add project markers with enhanced clustering
+    if show_highways and 'highways_gdf' in map_data and not map_data['highways_gdf'].empty:
+        highways_gdf = map_data['highways_gdf']
+        geojson_obj = _gdf_to_geojson(highways_gdf)
+        if geojson_obj and geojson_obj.get("features"):
+            def highway_style_function(feature):
+                return {
+                    'color': '#666666',
+                    'weight': 2,
+                    'opacity': 0.7
+                }
+            
+            folium.GeoJson(
+                data=geojson_obj,
+                name="Highways",
+                style_function=highway_style_function,
+                tooltip=folium.GeoJsonTooltip(
+                    fields=['FULLNAME'] if 'FULLNAME' in highways_gdf.columns else [],
+                    aliases=['Highway:'] if 'FULLNAME' in highways_gdf.columns else [],
+                    localize=True,
+                    sticky=False,
+                    labels=True,
+                    style="background-color: white; color: #111827; font-size: 14px; padding: 8px; border-radius: 5px;"
+                ) if 'FULLNAME' in highways_gdf.columns else None
+            ).add_to(m)
+    
     icon_create_fn = (
         "function(cluster) {"
         "  var count = cluster.getChildCount();"
@@ -504,7 +639,7 @@ if not df.empty:
         icon_create_function=icon_create_fn
     ).add_to(m)
     
-    for _, row in initial_df.iterrows():
+    for _, row in filtered_df.iterrows():
         lat = row.get('latitude')
         lng = row.get('longitude')
         
@@ -527,6 +662,7 @@ if not df.empty:
             
             proj_id = row.get('Project') or 'Unknown'
             location_text = row.get('Project_Location') or 'N/A'
+            district_text = row.get('district_num') or 'N/A'
             county_text = row.get('County') or 'N/A'
             route_text = row.get('Route') or 'N/A'
             year_text = row.get('CCA_FY') or 'N/A'
@@ -538,7 +674,7 @@ if not df.empty:
             <div style="font-family: Arial, sans-serif; width: 320px;">
                 <h4 style="color:#007A33; margin-bottom: 6px;">Project {proj_id}</h4>
                 <div style="font-size:13px; color:#111827;">
-                    <p style="margin:0;"><strong>Location:</strong> {location_text}</p>
+                    <p style="margin:0;"><strong>Location:</strong> {district_text}</p>
                     <p style="margin:0;"><strong>County:</strong> {county_text}</p>
                     <p style="margin:0;"><strong>Route:</strong> {route_text}</p>
                     <p style="margin:0;"><strong>Year:</strong> {year_text}</p>
@@ -562,150 +698,28 @@ if not df.empty:
                 tooltip=f"Project {proj_id} – {total_rel} displacements"
             ).add_to(marker_cluster)
     
-    # Add layer control
     folium.LayerControl(collapsed=False).add_to(m)
     
-    # Display map - FULL WIDTH
+    # DISPLAY MAP IN THE PLACEHOLDER AT THE TOP
     try:
-        st_folium(m, width=None, height=800, returned_objects=["last_object_clicked"])
+        with map_placeholder.container():
+            st_folium(m, width=None, height=800, returned_objects=[])
     except Exception as ex:
         st.error("Error rendering map.")
         logger.error(f"Map error: {ex}")
-
-# # NOW SHOW FILTERS AFTER THE MAP
-# st.markdown('<div class="filter-container">', unsafe_allow_html=True)
-st.markdown('<div class="filter-title">🔍 Explore & Filter Highway Projects</div>', unsafe_allow_html=True)
-
-# All filters in one row
-filter_cols = st.columns([2, 1.5, 1.5, 1.5, 1.5, 1.5])
-
-with filter_cols[0]:
-    search_text = st.text_input("🔎 Search", placeholder="Search projects, locations...", key="unified_search")
-
-with filter_cols[1]:
-    if not df.empty:
-        counties = ["All Counties"] + sorted(df["County"].dropna().unique().tolist())
-        selected_county = st.selectbox("📍 County", counties, key="unified_county")
-    else:
-        selected_county = "All Counties"
-
-with filter_cols[2]:
-    if not df.empty:
-        routes = ["All Routes"] + sorted(df["Route"].dropna().astype(str).unique().tolist(), key=lambda x: (not x.isdigit(), x))
-        selected_route = st.selectbox("🛣️ Route", routes, key="unified_route")
-    else:
-        selected_route = "All Routes"
-
-with filter_cols[3]:
-    if not df.empty:
-        years = ["All Years"] + sorted(df["CCA_FY"].dropna().astype(str).unique().tolist())
-        selected_year = st.selectbox("📅 Year", years, key="unified_year")
-    else:
-        selected_year = "All Years"
-
-with filter_cols[4]:
-    impact_filter = st.selectbox("🎯 Impact Level",
-                                ["All Projects", "High Impact (100+)",
-                                 "Medium Impact (20-100)", "Low Impact (1-20)", "No Impact"],
-                                key="unified_impact")
-
-with filter_cols[5]:
-    sort_by = st.selectbox("📊 Sort By",
-                          ["Total Relocations", "Year", "County", "Route"],
-                          key="unified_sort")
-
-# Map layer controls
-st.markdown("#### 🎨 Map Layers")
-layer_cols = st.columns(4)
-
-with layer_cols[0]:
-    show_assembly = st.checkbox("🏛️ Assembly Districts", value=True)
-with layer_cols[1]:
-    show_senate = st.checkbox("🏛️ Senate Districts", value=True)
-
-st.markdown('</div>', unsafe_allow_html=True)
-
-# Apply all filters
-if not df.empty:
-    filtered_df = df.copy()
     
-    # Apply search filter
-    if search_text:
-        search_mask = filtered_df.apply(
-            lambda row: any(
-                str(search_text).lower() in str(val).lower() 
-                for val in row.values if pd.notnull(val)
-            ), axis=1
-        )
-        filtered_df = filtered_df[search_mask]
+    st.session_state.map_rendered = True
     
-    # Apply county filter
-    if selected_county != "All Counties":
-        filtered_df = filtered_df[filtered_df["County"] == selected_county]
-    
-    # Apply route filter
-    if selected_route != "All Routes":
-        try:
-            sel_num = int(selected_route)
-            filtered_df = filtered_df[filtered_df["Route"] == sel_num]
-        except:
-            filtered_df = filtered_df[filtered_df["Route"].astype(str) == selected_route]
-    
-    # Apply year filter
-    if selected_year != "All Years":
-        try:
-            sel_year = int(selected_year)
-            filtered_df = filtered_df[filtered_df["CCA_FY"] == sel_year]
-        except:
-            filtered_df = filtered_df[filtered_df["CCA_FY"].astype(str) == selected_year]
-    
-    # Apply impact filter
-    if impact_filter != "All Projects":
-        if impact_filter == "High Impact (100+)":
-            filtered_df = filtered_df[filtered_df["Total_Relocations"].fillna(0) >= 100]
-        elif impact_filter == "Medium Impact (20-100)":
-            filtered_df = filtered_df[(filtered_df["Total_Relocations"].fillna(0) >= 20) &
-                                     (filtered_df["Total_Relocations"].fillna(0) < 100)]
-        elif impact_filter == "Low Impact (1-20)":
-            filtered_df = filtered_df[(filtered_df["Total_Relocations"].fillna(0) >= 1) &
-                                     (filtered_df["Total_Relocations"].fillna(0) < 20)]
-        elif impact_filter == "No Impact":
-            filtered_df = filtered_df[filtered_df["Total_Relocations"].fillna(0) == 0]
-    
-    # Apply sorting
-    if sort_by == "Total Relocations":
-        filtered_df = filtered_df.sort_values("Total_Relocations", ascending=False)
-    elif sort_by == "Year":
-        filtered_df = filtered_df.sort_values("CCA_FY", ascending=False)
-    elif sort_by == "County":
-        filtered_df = filtered_df.sort_values("County")
-    elif sort_by == "Route":
-        filtered_df = filtered_df.sort_values("Route")
-    
-    # # Display summary metrics
-    # st.markdown("### 📊 Summary Statistics")
-    # metric_cols = st.columns(4)
-    
-    # with metric_cols[0]:
-    #     st.metric("Projects Found", len(filtered_df))
-    # with metric_cols[1]:
-    #     st.metric("Total Homes Demolished", int(filtered_df["Num_Home_Demolished"].sum()))
-    # with metric_cols[2]:
-    #     st.metric("Total Businesses Demolished", int(filtered_df["Num_Business_Demolished"].sum()))
-    # with metric_cols[3]:
-    #     st.metric("Total Relocations", int(filtered_df["Total_Relocations"].sum()))
-    
-    # Enhanced data table BELOW THE MAP
+    # DISPLAY DATA TABLE WITH FILTERED DATA
     st.markdown("### 📋 Project Details")
     
-    # Select columns for display
     display_columns = [
-        'Project', 'County', 'Route', 'CCA_FY', 'Project_Location',
+        'Project', 'County', 'Assemblymember 1', 'Assemblymember 2', 'Assemblymember 3', 
+        'Senator 1', 'Senator 2', 'Route', 'CCA_FY', 'Project_Location',
         'Num_Home_Demolished', 'Num_Business_Demolished', 'Total_Relocations'
     ]
     available_columns = [col for col in display_columns if col in filtered_df.columns]
     
-    # Enhanced dataframe with styling
     if available_columns and not filtered_df.empty:
         styled_df = filtered_df[available_columns].style.format({
             'Num_Home_Demolished': '{:.0f}',
@@ -718,4 +732,4 @@ if not df.empty:
             vmax=filtered_df['Total_Relocations'].max() if filtered_df['Total_Relocations'].max() > 0 else 1
         )
         
-        st.dataframe(styled_df, use_container_width=True, height=400)
+        st.dataframe(styled_df, use_container_width=True, height=400)    
