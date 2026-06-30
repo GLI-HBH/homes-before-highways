@@ -362,7 +362,7 @@ with filter_row1[3]:
 
 with filter_row1[4]:
     if not df.empty:
-        years = ["All Years"] + sorted(df["CCA_FY"].dropna().astype(str).unique().tolist())
+        years = ["All Years"] + sorted(df["Year"].dropna().astype(str).unique().tolist())
         selected_year = st.selectbox("📅 Year", years, key="unified_year")
     else:
         selected_year = "All Years"
@@ -420,9 +420,9 @@ if not df.empty:
     if selected_year != "All Years":
         try:
             sel_year = int(selected_year)
-            filtered_df = filtered_df[filtered_df["CCA_FY"] == sel_year]
+            filtered_df = filtered_df[filtered_df["Year"] == sel_year]
         except:
-            filtered_df = filtered_df[filtered_df["CCA_FY"].astype(str) == selected_year]
+            filtered_df = filtered_df[filtered_df["Year"].astype(str) == selected_year]
     
     if impact_filter != "All Projects":
         if impact_filter == "High Impact (100+)":
@@ -443,7 +443,7 @@ if not df.empty:
     elif sort_by == "Businesses Demolished":
         filtered_df = filtered_df.sort_values("Num_Business_Demolished", ascending=False)
     elif sort_by == "Year":
-        filtered_df = filtered_df.sort_values("CCA_FY", ascending=False)
+        filtered_df = filtered_df.sort_values("Year", ascending=False)
     elif sort_by == "County":
         filtered_df = filtered_df.sort_values("County")
     elif sort_by == "Route":
@@ -666,7 +666,7 @@ if not df.empty:
             county_text = row.get('County') or 'N/A'
             route_text = int(pd.to_numeric(row.get('Route'), errors='coerce') or 0)
 
-            year_val = pd.to_numeric(row.get('CCA_FY'), errors='coerce')
+            year_val = pd.to_numeric(row.get('Year'), errors='coerce')
             year_text = int(year_val) if pd.notna(year_val) else 0
             
             homes_val = pd.to_numeric(row.get('Num_Home_Demolished'), errors='coerce')
@@ -723,7 +723,7 @@ if not df.empty:
     
     display_columns = [
         'Project', 'County', 'Assemblymember 1', 'Assemblymember 2', 'Assemblymember 3', 
-        'Senator 1', 'Senator 2', 'Route', 'CCA_FY', 'Project_Location',
+        'Senator 1', 'Senator 2', 'Route', 'Year', 'Project_Location',
         'Num_Home_Demolished', 'Num_Business_Demolished', 'Total_Relocations'
     ]
     available_columns = [col for col in display_columns if col in filtered_df.columns]
