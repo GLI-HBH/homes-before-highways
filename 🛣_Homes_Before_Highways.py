@@ -664,7 +664,7 @@ if not df.empty:
             location_text = row.get('Location') or 'N/A'
             city_text = row.get('City') or 'N/A'
             county_text = row.get('County') or 'N/A'
-            route_text = int(pd.to_numeric(row.get('Route'), errors='coerce') or 0)
+            route_text = row.get('Route') or 'N/A'
 
             year_val = pd.to_numeric(row.get('Year'), errors='coerce')
             year_text = int(year_val) if pd.notna(year_val) else 0
