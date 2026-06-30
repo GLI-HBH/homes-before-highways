@@ -661,20 +661,28 @@ if not df.empty:
                 mcolor = '#007A33'
             
             proj_id = row.get('Project') or 'Unknown'
-            location_text = row.get('Project_Location') or 'N/A'
-            district_text = row.get('district_num') or 'N/A'
+            location_text = row.get('Location') or 'N/A'
+            city_text = row.get('City') or 'N/A'
             county_text = row.get('County') or 'N/A'
-            route_text = row.get('Route') or 'N/A'
-            year_text = row.get('CCA_FY') or 'N/A'
-            homes_dem = int(row.get('Num_Home_Demolished') or 0)
-            bus_dem = int(row.get('Num_Business_Demolished') or 0)
-            total_rel = int(row.get('Total_Relocations') or 0)
+            route_text = int(pd.to_numeric(row.get('Route'), errors='coerce') or 0)
+
+            year_val = pd.to_numeric(row.get('CCA_FY'), errors='coerce')
+            year_text = int(year_val) if pd.notna(year_val) else 0
+            
+            homes_val = pd.to_numeric(row.get('Num_Home_Demolished'), errors='coerce')
+            homes_dem = int(homes_val) if pd.notna(homes_val) else 0
+            
+            bus_val = pd.to_numeric(row.get('Num_Business_Demolished'), errors='coerce')
+            bus_dem = int(bus_val) if pd.notna(bus_val) else 0
+            
+            rel_val = pd.to_numeric(row.get('Total_Relocations'), errors='coerce')
+            total_rel = int(rel_val) if pd.notna(rel_val) else 0
             
             popup_content = f"""
             <div style="font-family: Arial, sans-serif; width: 320px;">
                 <h4 style="color:#007A33; margin-bottom: 6px;">Project {proj_id}</h4>
                 <div style="font-size:13px; color:#111827;">
-                    <p style="margin:0;"><strong>Location:</strong> {district_text}</p>
+                    <p style="margin:0;"><strong>City:</strong> {city_text}</p>
                     <p style="margin:0;"><strong>County:</strong> {county_text}</p>
                     <p style="margin:0;"><strong>Route:</strong> {route_text}</p>
                     <p style="margin:0;"><strong>Year:</strong> {year_text}</p>
